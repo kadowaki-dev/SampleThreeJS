@@ -45,7 +45,20 @@ function init() {
   // シーンにライト追加
   scene.add(light);
 
-  //レンダリング
-  renderer.render(scene, camera);
+  // 初回実行
+  tick();
+
+  function tick() {
+    requestAnimationFrame(tick);
+
+    // 箱を回転させる
+    box.rotation.x += 0.1; //x軸の回転角 (ラジアン)
+    box.rotation.y += 0.1; //y軸の回転角 (ラジアン)
+    box.rotation.z += 0.1; //z軸の回転角 (ラジアン)
+
+    // レンダリング
+    renderer.render(scene, camera);
+  }
+
 
 }
