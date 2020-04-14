@@ -6,7 +6,7 @@ function init() {
   const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector("#myCanvas")
   });
-  const width = 960
+  const width = 1200
   const height = 540
   renderer.setSize(width, height);
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -17,12 +17,12 @@ function init() {
 
   /* カメラ作成 */
   const camera = new THREE.PerspectiveCamera(
-    45,
+    60,
     width / height,
     1,
-    10000
+    1000
   );
-  camera.position.set(0,0,1000)
+  //camera.position.set(0,0,1000)
 
   /* メッシュ作成 */
   // new THREE.BoxGeometry(幅, 高さ, 奥行き)
@@ -49,11 +49,11 @@ function init() {
   let mouseX=0
 
   // 初回実行
-  tick();
-  // requestAnimationFrame(tick);  //1回だけ動かす用
+  //tick();
+  requestAnimationFrame(tick);  //1回だけ動かす用
 
   function tick() {
-    requestAnimationFrame(tick);
+    //requestAnimationFrame(tick);
 
     // 箱を回転させる
     // box.rotation.x += 0.1; //x軸の回転角 (ラジアン)
@@ -84,6 +84,7 @@ function init() {
     light.position.x = 1000 * Math.sin(radian);
     light.position.z = 1000 * Math.cos(radian);
 
+    console.log("camera.position" + camera.position);
     // レンダリング
     renderer.render(scene, camera);
   }
@@ -91,5 +92,6 @@ function init() {
   // マウス座標はマウスが動いた時のみ取得できる
   document.addEventListener("mousemove", (event) => {
     mouseX = event.pageX;
+    tick();
   });
 }
