@@ -18,3 +18,7 @@
   * [Three.jsのカメラの制御](https://ics.media/tutorial-three/camera_position/)
   * [デモ](https://ics-creative.github.io/tutorial-three/samples/camera_basic_earth.html)
   * [デモのソース](https://github.com/ics-creative/tutorial-three/blob/master/samples/camera_basic_earth.html)
+* PerspectiveCameraの基礎
+  * [Three.jsのカメラ](https://ics.media/tutorial-three/camera_variation/)
+  * [デモ](https://ics-creative.github.io/tutorial-three/samples/camera_perspective.html)
+  * [デモのソース](https://github.com/ics-creative/tutorial-three/blob/master/samples/camera_perspective.html)
