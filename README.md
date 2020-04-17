@@ -22,3 +22,7 @@
   * [Three.jsのカメラ](https://ics.media/tutorial-three/camera_variation/)
   * [デモ](https://ics-creative.github.io/tutorial-three/samples/camera_perspective.html)
   * [デモのソース](https://github.com/ics-creative/tutorial-three/blob/master/samples/camera_perspective.html)
+* ワールド座標
+  * [Three.jsのワールド座標の算出](https://ics.media/tutorial-three/position_world/)
+  * [デモ](https://ics-creative.github.io/tutorial-three/samples/position_world.html)
+  * [デモのソース](https://github.com/ics-creative/tutorial-three/blob/master/samples/position_world.html)
