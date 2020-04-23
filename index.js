@@ -13,6 +13,10 @@ function init() {
 
   /* シーン作成 */
   const scene = new THREE.Scene();
+  // 地球
+  const earth = createEarth();
+  scene.add(earth);
+
   // new THREE.PerspectiveCamera(画角, アスペクト比, 描画開始距離, 描画終了距離)
 
   /* カメラ作成 */
@@ -26,15 +30,15 @@ function init() {
 
   /* メッシュ作成 */
   // new THREE.BoxGeometry(幅, 高さ, 奥行き)
-  const geometry = new THREE.BoxGeometry(300, 500, 200);
+  //const geometry = new THREE.BoxGeometry(300, 500, 200);
   // 色、質感
-  const material = new THREE.MeshStandardMaterial({
-    color: 0x0000ff
-  });
+  // const material = new THREE.MeshStandardMaterial({
+  //   color: 0x0000ff
+  // });
   // new THREE.Mesh(ジオメトリ,マテリアル)
-  const box = new THREE.Mesh(geometry, material);
+  //const box = new THREE.Mesh(geometry, material);
   // シーンにメッシュ追加
-  scene.add(box);
+  //scene.add(box);
 
   /* ライト作成 */
   // new THREE.DirectionalLight(色)
@@ -87,6 +91,47 @@ function init() {
     console.log("camera.position" + camera.position);
     // レンダリング
     renderer.render(scene, camera);
+  }
+
+  /**
+ * 地球を生成します
+ * @returns {THREE.Mesh} 球
+ */
+function createEarth() {
+  // 球
+  const texture = (new THREE.TextureLoader).load('img/ground.jpg');
+  return new THREE.Mesh(
+    new THREE.SphereGeometry(100, 400, 400),
+    new THREE.MeshBasicMaterial({map: texture}));
+}
+
+
+  function getOrbitPoints(startPos, endPos, segmentNum) {
+    // 頂点を格納する配列
+    const vertices = [];
+    const startVec = startPos.clone();
+    const endVec = endPos.clone();
+  
+    // 2つのベクトルの回転軸
+    const axis = startVec.clone().cross(endVec);
+    // 軸ベクトルを単位ベクトルに
+    axis.normalize();
+    // 2つのベクトルが織りなす角度
+    const angle = startVec.angleTo(endVec);
+  
+    // 2つの点を結ぶ弧を描くための頂点を打つ
+    for (let i = 0; i < segmentNum; i++) {
+      // axisを軸としたクォータニオンを生成
+      const q = new THREE.Quaternion();
+      q.setFromAxisAngle(axis, (angle / segmentNum) * i);
+      // ベクトルを回転させる
+      const vertex = startVec.clone().applyQuaternion(q);
+      vertices.push(vertex);
+    }
+  
+    // 終了点を追加
+    vertices.push(endVec);
+    return vertices;
   }
 
   // マウス座標はマウスが動いた時のみ取得できる
