@@ -1,142 +1,110 @@
 window.addEventListener("DOMContentLoaded", init);
 
 function init() {
-
-  /* レンダラー作成 */
-  const renderer = new THREE.WebGLRenderer({
-    canvas: document.querySelector("#myCanvas")
-  });
-  const width = 1200
-  const height = 540
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(window.devicePixelRatio);
-
-  /* シーン作成 */
+  // シーン
   const scene = new THREE.Scene();
+
+  // カメラ
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.set(0, 0, -400);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+  // レンダラー
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    canvas: document.querySelector('#myCanvas'),
+  });
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio); 
+
+  let degree = 0; // 角度
+  const radius = 150; // 半径
+  let frontVector = new THREE.Vector3(0, -1, 0);
+
+  // 球
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(10),
+    new THREE.MeshBasicMaterial({color: 0xCC0000, wireframe: true}),
+  );
+  scene.add(sphere);
+
+  // ヘルパー
+  const helper = new THREE.ArrowHelper(
+    frontVector,
+    new THREE.Vector3(0, 0, 0),
+    40,
+  );
+  sphere.add(helper);
+
   // 地球
-  const earth = createEarth();
+  const earth = new THREE.Mesh(
+    new THREE.SphereGeometry(70, 20, 20),
+    new THREE.MeshBasicMaterial({color: 0x666666, wireframe: true}),
+  );
   scene.add(earth);
 
-  // new THREE.PerspectiveCamera(画角, アスペクト比, 描画開始距離, 描画終了距離)
+  // 地面
+  const plane = new THREE.GridHelper(1000, 20);
+  plane.position.y = -80;
+  scene.add(plane);
 
-  /* カメラ作成 */
-  const camera = new THREE.PerspectiveCamera(
-    60,
-    width / height,
-    1,
-    1000
-  );
-  //camera.position.set(0,0,1000)
-
-  /* メッシュ作成 */
-  // new THREE.BoxGeometry(幅, 高さ, 奥行き)
-  //const geometry = new THREE.BoxGeometry(300, 500, 200);
-  // 色、質感
-  // const material = new THREE.MeshStandardMaterial({
-  //   color: 0x0000ff
-  // });
-  // new THREE.Mesh(ジオメトリ,マテリアル)
-  //const box = new THREE.Mesh(geometry, material);
-  // シーンにメッシュ追加
-  //scene.add(box);
-
-  /* ライト作成 */
-  // new THREE.DirectionalLight(色)
-  const light = new THREE.DirectionalLight(0xffffff);
-  // ライトの位置を変更
-  light.position.set(1, 1, 1);
-  light.intensity = 2; // 光の強さを倍に
-  // シーンにライト追加
-  scene.add(light);
-
-  let rot=0
-  let mouseX=0
-
-  // 初回実行
-  //tick();
-  requestAnimationFrame(tick);  //1回だけ動かす用
+  // フレーム毎のレンダーを登録
+  tick();
 
   function tick() {
-    //requestAnimationFrame(tick);
+    requestAnimationFrame(tick);
+  
+    // 球を回転させる
+    degree -= 2;
+  
+    // 現在の位置を保持しておく
+    const oldPosition = sphere.position.clone();
+    // アニメーション後の新しい位置を取得
+    const newPosition = getCircularMotionPosition(degree);
+    // oldPostion - newPositionで進んでいる方向のベクトルを算出
+    // frontVector = newPosition.clone().sub(oldPosition);
+    frontVector = newPosition.clone().subVectors(newPosition, oldPosition);
+    // 単位ベクトルに変換
+    frontVector = frontVector.normalize();
 
-    // 箱を回転させる
-    // box.rotation.x += 0.1; //x軸の回転角 (ラジアン)
-    // box.rotation.y += 0.1; //y軸の回転角 (ラジアン)
-    // box.rotation.z += 0.1; //z軸の回転角 (ラジアン)
+    // 球の位置を更新
+    sphere.position.copy(newPosition);
 
-    //自動回転 度数
-    //rot+=0.5
+    // ヘルパーの向きを更新
+    helper.setDirection(frontVector);
 
-    // マウスの位置に応じて角度を設定
-    // マウスのX座標がステージの幅の何%の位置にあるか調べてそれを360度で乗算する
-    const targetRot = (mouseX / window.innerWidth) * 360;
-    // イージングの公式を用いて滑らかにする
-    // 値 += (目標値 - 現在の値) * 減速値
-    rot += (targetRot - rot) * 0.02;
-    
-    // ラジアンに変換する
-    const radian = rot * Math.PI / 180; 
-
-    // 角度に応じてカメラの位置を設定
-    camera.position.x = 1000 * Math.sin(radian);
-    camera.position.z = 1000 * Math.cos(radian);
-
-    // 原点方向を見つめる
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-    // ライトも動かす（ライトの向きは？）
-    light.position.x = 1000 * Math.sin(radian);
-    light.position.z = 1000 * Math.cos(radian);
-
-    console.log("camera.position" + camera.position);
-    // レンダリング
     renderer.render(scene, camera);
   }
 
   /**
- * 地球を生成します
- * @returns {THREE.Mesh} 球
- */
-function createEarth() {
-  // 球
-  const texture = (new THREE.TextureLoader).load('img/ground.jpg');
-  return new THREE.Mesh(
-    new THREE.SphereGeometry(100, 400, 400),
-    new THREE.MeshBasicMaterial({map: texture}));
-}
+   * 角度を渡して円運動の位置を返却します
+   * @param {Number} degree 角度です。
+   * @returns {THREE.Vector3}
+   */
+  function getCircularMotionPosition(degree) {
+    // 角度をラジアンに変換します
+    const rad = degree * Math.PI / 180;
+    // X座標 = 半径 x Cosθ
+    const x = radius * Math.cos(rad);
+    // Y座標
+    const y = radius * Math.sin(rad * 1.5) / 7;
+    // Z座標 = 半径 x Sinθ
+    const z = radius * Math.sin(rad);
 
-
-  function getOrbitPoints(startPos, endPos, segmentNum) {
-    // 頂点を格納する配列
-    const vertices = [];
-    const startVec = startPos.clone();
-    const endVec = endPos.clone();
-  
-    // 2つのベクトルの回転軸
-    const axis = startVec.clone().cross(endVec);
-    // 軸ベクトルを単位ベクトルに
-    axis.normalize();
-    // 2つのベクトルが織りなす角度
-    const angle = startVec.angleTo(endVec);
-  
-    // 2つの点を結ぶ弧を描くための頂点を打つ
-    for (let i = 0; i < segmentNum; i++) {
-      // axisを軸としたクォータニオンを生成
-      const q = new THREE.Quaternion();
-      q.setFromAxisAngle(axis, (angle / segmentNum) * i);
-      // ベクトルを回転させる
-      const vertex = startVec.clone().applyQuaternion(q);
-      vertices.push(vertex);
-    }
-  
-    // 終了点を追加
-    vertices.push(endVec);
-    return vertices;
+    return new THREE.Vector3(x, y, z);
   }
 
-  // マウス座標はマウスが動いた時のみ取得できる
-  document.addEventListener("mousemove", (event) => {
-    mouseX = event.pageX;
-    tick();
+
+  // リサイズ時の処理
+  window.addEventListener('resize', () => {
+    // カメラのアスペクト比を更新
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    // レンダラーのサイズを更新
+    renderer.setSize(window.innerWidth, window.innerHeight);
   });
+
+
 }
