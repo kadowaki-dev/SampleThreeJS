@@ -74,6 +74,22 @@ function init() {
     // ヘルパーの向きを更新
     helper.setDirection(frontVector);
 
+    // 背面ベクトル
+    const backVector = frontVector.clone().negate();
+
+    // 球とカメラの距離
+    const distance = 200;
+    // 背面ベクトルを距離分引き伸ばす
+    backVector.multiplyScalar(distance);
+
+    // カメラ位置を算出
+    const cameraPosition = backVector.add(sphere.position);
+    // 算出したカメラ位置を反映
+    camera.position.copy(cameraPosition);
+
+    // カメラを球に向かせる
+    camera.lookAt(sphere.position);
+
     renderer.render(scene, camera);
   }
 
