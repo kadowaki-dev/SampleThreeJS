@@ -6,9 +6,10 @@ function init() {
 
   // カメラ
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-  camera.position.set(0, 0, -400);
+  // camera.position.set(0, 0, -400);
+  camera.position.set(0, 0, 400);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
-
+  
   // レンダラー
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -20,7 +21,7 @@ function init() {
 
   let degree = 0; // 角度
   const radius = 150; // 半径
-  let frontVector = new THREE.Vector3(0, -1, 0);
+  // let frontVector = new THREE.Vector3(0, 1, 0);
 
   // 球
   const sphere = new THREE.Mesh(
@@ -30,12 +31,12 @@ function init() {
   scene.add(sphere);
 
   // ヘルパー
-  const helper = new THREE.ArrowHelper(
-    frontVector,
-    new THREE.Vector3(0, 0, 0),
-    40,
-  );
-  sphere.add(helper);
+  // const helper = new THREE.ArrowHelper(
+  //   frontVector,
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // sphere.add(helper);
 
   // 地球
   const earth = new THREE.Mesh(
@@ -50,7 +51,78 @@ function init() {
   scene.add(plane);
 
   // フレーム毎のレンダーを登録
-  tick();
+  // tick();
+
+  /* ベクトルお試し start */
+  // let frontVector2 = new THREE.Vector3(1, 0, 0);
+  // const helper2 = new THREE.ArrowHelper(
+  //   frontVector2,
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // helper2.setColor(new THREE.Color( 'skyblue' ))
+  // sphere.add(helper2);
+
+  /// ベクトル加算
+  // console.log('frontVector: ', frontVector);
+  // let frontVector3 = frontVector.clone().add(frontVector2)  //frontVectorは変更したくないのでclone()
+  // console.log('frontVector: ', frontVector);
+  // const helper3 = new THREE.ArrowHelper(
+  //   frontVector3.normalize(),
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // helper3.setColor(new THREE.Color( 'red' ))
+  // sphere.add(helper3);
+
+  /// ベクトル減算
+  const oldPosition = sphere.position.clone();
+  console.log('oldPosition: ', oldPosition);
+  const newPosition = getCircularMotionPosition(-2);
+  console.log('newPosition: ', newPosition);
+  frontVector = newPosition.clone().subVectors(newPosition, oldPosition);
+  console.log('frontVector: ', frontVector);
+
+  const helperOld = new THREE.ArrowHelper(
+    oldPosition,
+    new THREE.Vector3(100, 0, 0),
+    40,
+  );
+  helperOld.setColor(new THREE.Color( 'orange' ))
+  sphere.add(helperOld);
+  
+  const helperNew = new THREE.ArrowHelper(
+    newPosition.normalize(),
+    new THREE.Vector3(100, 0, 0),
+    40,
+  );
+  helperNew.setColor(new THREE.Color( 'purple' ))
+  sphere.add(helperNew);
+
+  // const helperFront = new THREE.ArrowHelper(
+  //   frontVector.normalize(),
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // helperFront.setColor(new THREE.Color( 'white' ))
+  // sphere.add(helperFront);
+
+  // let frontVector4 = frontVector.clone().sub(frontVector2)
+  // let frontVector4 = frontVector.clone().subVectors(frontVector, frontVector2)
+  // console.log('frontVector4: ', frontVector4);
+  // console.log('frontVector4.normalize(): ', frontVector4.normalize());
+  // const helper4 = new THREE.ArrowHelper(
+  //   frontVector4.normalize(),
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // helper4.setColor(new THREE.Color( 'green' ))
+  // sphere.add(helper4);
+
+  /* ベクトルお試し end */
+
+  // アニメーションなし事項
+  renderer.render(scene, camera);
 
   function tick() {
     requestAnimationFrame(tick);
