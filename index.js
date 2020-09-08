@@ -28,7 +28,13 @@ function init() {
     new THREE.SphereGeometry(10),
     new THREE.MeshBasicMaterial({color: 0xCC0000, wireframe: true}),
   );
+  const sphere2 = new THREE.Mesh(
+    new THREE.SphereGeometry(10),
+    new THREE.MeshBasicMaterial({color: 0xCC0000, wireframe: true}),
+  );
   scene.add(sphere);
+  scene.add(sphere2);
+  sphere2.position.set(-100, 100, 0)
 
   // ヘルパー
   // const helper = new THREE.ArrowHelper(
@@ -98,6 +104,15 @@ function init() {
   );
   helperNew.setColor(new THREE.Color( 'purple' ))
   sphere.add(helperNew);
+
+  const newposition2 = new THREE.Vector3(-100, 0, 0);
+  const helperSub = new THREE.ArrowHelper(
+    newposition2.clone().sub(sphere2.position),
+    new THREE.Vector3(0, 0, 0),
+    40,
+    'blue'
+  );
+  sphere.add(helperSub);
 
   // const helperFront = new THREE.ArrowHelper(
   //   frontVector.normalize(),
