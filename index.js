@@ -21,7 +21,7 @@ function init() {
 
   let degree = 0; // 角度
   const radius = 150; // 半径
-  // let frontVector = new THREE.Vector3(0, 1, 0);
+  let frontVector = new THREE.Vector3(0, 1, 0);
 
   // 球
   const sphere = new THREE.Mesh(
@@ -37,12 +37,12 @@ function init() {
   sphere2.position.set(-100, 100, 0)
 
   // ヘルパー
-  // const helper = new THREE.ArrowHelper(
-  //   frontVector,
-  //   new THREE.Vector3(100, 0, 0),
-  //   40,
-  // );
-  // sphere.add(helper);
+  const helper = new THREE.ArrowHelper(
+    frontVector,
+    new THREE.Vector3(100, 0, 0),
+    40,
+  );
+  sphere.add(helper);
 
   // 地球
   const earth = new THREE.Mesh(
@@ -55,9 +55,6 @@ function init() {
   const plane = new THREE.GridHelper(1000, 20);
   plane.position.y = -80;
   scene.add(plane);
-
-  // フレーム毎のレンダーを登録
-  // tick();
 
   /* ベクトルお試し start */
   // let frontVector2 = new THREE.Vector3(1, 0, 0);
@@ -82,37 +79,37 @@ function init() {
   // sphere.add(helper3);
 
   /// ベクトル減算
-  const oldPosition = sphere.position.clone();
-  console.log('oldPosition: ', oldPosition);
-  const newPosition = getCircularMotionPosition(-2);
-  console.log('newPosition: ', newPosition);
-  frontVector = newPosition.clone().subVectors(newPosition, oldPosition);
-  console.log('frontVector: ', frontVector);
+  // const oldPosition = sphere.position.clone();
+  // console.log('oldPosition: ', oldPosition);
+  // const newPosition = getCircularMotionPosition(-2);
+  // console.log('newPosition: ', newPosition);
+  // frontVector = newPosition.clone().subVectors(newPosition, oldPosition);
+  // console.log('frontVector: ', frontVector);
 
-  const helperOld = new THREE.ArrowHelper(
-    oldPosition,
-    new THREE.Vector3(100, 0, 0),
-    40,
-  );
-  helperOld.setColor(new THREE.Color( 'orange' ))
-  sphere.add(helperOld);
+  // const helperOld = new THREE.ArrowHelper(
+  //   oldPosition,
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // helperOld.setColor(new THREE.Color( 'orange' ))
+  // sphere.add(helperOld);
   
-  const helperNew = new THREE.ArrowHelper(
-    newPosition.normalize(),
-    new THREE.Vector3(100, 0, 0),
-    40,
-  );
-  helperNew.setColor(new THREE.Color( 'purple' ))
-  sphere.add(helperNew);
+  // const helperNew = new THREE.ArrowHelper(
+  //   newPosition.normalize(),
+  //   new THREE.Vector3(100, 0, 0),
+  //   40,
+  // );
+  // helperNew.setColor(new THREE.Color( 'purple' ))
+  // sphere.add(helperNew);
 
-  const newposition2 = new THREE.Vector3(-100, 0, 0);
-  const helperSub = new THREE.ArrowHelper(
-    newposition2.clone().sub(sphere2.position),
-    new THREE.Vector3(0, 0, 0),
-    40,
-    'blue'
-  );
-  sphere.add(helperSub);
+  // const newposition2 = new THREE.Vector3(-100, 0, 0);
+  // const helperSub = new THREE.ArrowHelper(
+  //   newposition2.clone().sub(sphere2.position),
+  //   new THREE.Vector3(0, 0, 0),
+  //   40,
+  //   'blue'
+  // );
+  // sphere.add(helperSub);
 
   // const helperFront = new THREE.ArrowHelper(
   //   frontVector.normalize(),
@@ -136,12 +133,24 @@ function init() {
 
   /* ベクトルお試し end */
 
+  // フレーム初期値
+  let frame = 0
+
+  // フレーム毎のレンダーを登録
+  tick();
+
   // アニメーションなし事項
   renderer.render(scene, camera);
 
   function tick() {
     requestAnimationFrame(tick);
-  
+
+    // fps調整
+    frame++
+    if (frame % 2 == 0) {
+      return
+    }
+
     // 球を回転させる
     degree -= 2;
   
@@ -150,8 +159,8 @@ function init() {
     // アニメーション後の新しい位置を取得
     const newPosition = getCircularMotionPosition(degree);
     // oldPostion - newPositionで進んでいる方向のベクトルを算出
-    // frontVector = newPosition.clone().sub(oldPosition);
-    frontVector = newPosition.clone().subVectors(newPosition, oldPosition);
+    frontVector = newPosition.clone().sub(oldPosition);
+    // frontVector = newPosition.clone().subVectors(newPosition, oldPosition);
     // 単位ベクトルに変換
     frontVector = frontVector.normalize();
 
@@ -209,5 +218,29 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
+  const getGPUDriver = () => {
+    const canvas = document.getElementById("myCanvas");
+    let gl;
+    let renderer;
+    try {
+      gl = canvas.getContext("experimental-webgl");
+
+      //ドライバー情報を取得
+      const ext = gl.getExtension("WEBGL_debug_renderer_info");
+
+      if (!ext) {
+        renderer = "";
+      } else {
+        renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+      }
+    } catch (e) {
+      // WebGL未対応の場合
+      gl = null;
+      renderer = "";
+    }
+    // ドライバの種類を出力
+    console.log(renderer);
+  }
+  getGPUDriver()
 
 }
